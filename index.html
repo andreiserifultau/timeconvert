@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>World Time Converter</title>
+<title>World Time · City Clock</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -35,6 +35,11 @@
     font-weight: 300; color: var(--accent); letter-spacing: -0.02em;
   }
   header span { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+  .build-tag {
+    position: fixed; bottom: 1rem; right: 1.2rem;
+    font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase;
+    pointer-events: none; z-index: 999;
+  }
 
   .date-nav { display: flex; align-items: center; gap: 0.4rem; margin-left: auto; }
   .date-btn {
@@ -181,8 +186,8 @@
 <body>
 
 <header>
-  <h1>World Time 1.0</h1>
-  <span>Convert timezones easily</span>
+  <h1>World Time</h1>
+  <span>city clock</span>
   <div class="date-nav" id="dateNav"></div>
 </header>
 
@@ -218,6 +223,18 @@ const CITIES = [
   { name:'San Francisco', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
   { name:'Houston', country:'United States', tz:'America/Chicago', abbr:'CST' },
   { name:'Phoenix', country:'United States', tz:'America/Phoenix', abbr:'MST' },
+  { name:'Atlanta', country:'United States', tz:'America/New_York', abbr:'EST' },
+  { name:'Dallas', country:'United States', tz:'America/Chicago', abbr:'CST' },
+  { name:'Las Vegas', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
+  { name:'Minneapolis', country:'United States', tz:'America/Chicago', abbr:'CST' },
+  { name:'Detroit', country:'United States', tz:'America/Detroit', abbr:'EST' },
+  { name:'Philadelphia', country:'United States', tz:'America/New_York', abbr:'EST' },
+  { name:'Washington DC', country:'United States', tz:'America/New_York', abbr:'EST' },
+  { name:'Nashville', country:'United States', tz:'America/Chicago', abbr:'CST' },
+  { name:'Portland', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
+  { name:'San Diego', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
+  { name:'Orlando', country:'United States', tz:'America/New_York', abbr:'EST' },
+  { name:'Salt Lake City', country:'United States', tz:'America/Denver', abbr:'MST' },
   { name:'London', country:'United Kingdom', tz:'Europe/London', abbr:'GMT' },
   { name:'Paris', country:'France', tz:'Europe/Paris', abbr:'CET' },
   { name:'Berlin', country:'Germany', tz:'Europe/Berlin', abbr:'CET' },
@@ -245,6 +262,7 @@ const CITIES = [
   { name:'Riyadh', country:'Saudi Arabia', tz:'Asia/Riyadh', abbr:'AST' },
   { name:'Mumbai', country:'India', tz:'Asia/Kolkata', abbr:'IST' },
   { name:'Delhi', country:'India', tz:'Asia/Kolkata', abbr:'IST' },
+  { name:'New Delhi', country:'India', tz:'Asia/Kolkata', abbr:'IST' },
   { name:'Bangalore', country:'India', tz:'Asia/Kolkata', abbr:'IST' },
   { name:'Kolkata', country:'India', tz:'Asia/Kolkata', abbr:'IST' },
   { name:'Singapore', country:'Singapore', tz:'Asia/Singapore', abbr:'SGT' },
@@ -260,6 +278,7 @@ const CITIES = [
   { name:'Karachi', country:'Pakistan', tz:'Asia/Karachi', abbr:'PKT' },
   { name:'Dhaka', country:'Bangladesh', tz:'Asia/Dhaka', abbr:'BST' },
   { name:'Colombo', country:'Sri Lanka', tz:'Asia/Colombo', abbr:'SLST' },
+  { name:'Port Louis', country:'Mauritius', tz:'Indian/Mauritius', abbr:'MUT' },
   { name:'Kathmandu', country:'Nepal', tz:'Asia/Kathmandu', abbr:'NPT' },
   { name:'Tehran', country:'Iran', tz:'Asia/Tehran', abbr:'IRST' },
   { name:'Baghdad', country:'Iraq', tz:'Asia/Baghdad', abbr:'AST' },
@@ -268,6 +287,21 @@ const CITIES = [
   { name:'Nairobi', country:'Kenya', tz:'Africa/Nairobi', abbr:'EAT' },
   { name:'Johannesburg', country:'South Africa', tz:'Africa/Johannesburg', abbr:'SAST' },
   { name:'Casablanca', country:'Morocco', tz:'Africa/Casablanca', abbr:'WET' },
+  { name:'Accra', country:'Ghana', tz:'Africa/Accra', abbr:'GMT' },
+  { name:'Addis Ababa', country:'Ethiopia', tz:'Africa/Addis_Ababa', abbr:'EAT' },
+  { name:'Dar es Salaam', country:'Tanzania', tz:'Africa/Dar_es_Salaam', abbr:'EAT' },
+  { name:'Dakar', country:'Senegal', tz:'Africa/Dakar', abbr:'GMT' },
+  { name:'Khartoum', country:'Sudan', tz:'Africa/Khartoum', abbr:'CAT' },
+  { name:'Tunis', country:'Tunisia', tz:'Africa/Tunis', abbr:'CET' },
+  { name:'Algiers', country:'Algeria', tz:'Africa/Algiers', abbr:'CET' },
+  { name:'Tripoli', country:'Libya', tz:'Africa/Tripoli', abbr:'EET' },
+  { name:'Kampala', country:'Uganda', tz:'Africa/Kampala', abbr:'EAT' },
+  { name:'Lusaka', country:'Zambia', tz:'Africa/Lusaka', abbr:'CAT' },
+  { name:'Harare', country:'Zimbabwe', tz:'Africa/Harare', abbr:'CAT' },
+  { name:'Maputo', country:'Mozambique', tz:'Africa/Maputo', abbr:'CAT' },
+  { name:'Luanda', country:'Angola', tz:'Africa/Luanda', abbr:'WAT' },
+  { name:'Abidjan', country:'Ivory Coast', tz:'Africa/Abidjan', abbr:'GMT' },
+  { name:'Douala', country:'Cameroon', tz:'Africa/Douala', abbr:'WAT' },
   { name:'Sydney', country:'Australia', tz:'Australia/Sydney', abbr:'AEDT' },
   { name:'Melbourne', country:'Australia', tz:'Australia/Melbourne', abbr:'AEDT' },
   { name:'Brisbane', country:'Australia', tz:'Australia/Brisbane', abbr:'AEST' },
@@ -893,5 +927,6 @@ cities = [
 ];
 render();
 </script>
+<div class="build-tag"> build v1.1. (27-feb-26)</div>
 </body>
 </html>
