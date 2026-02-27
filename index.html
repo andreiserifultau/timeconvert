@@ -134,6 +134,7 @@
   .timeline-wrap { overflow-x: auto; position: relative; scrollbar-width: none; }
   .timeline-wrap::-webkit-scrollbar { display: none; }
 
+
   .timeline {
     display: flex; align-items: stretch;
     position: relative; height: 82px;
@@ -181,6 +182,37 @@
 
   .empty-state { text-align: center; padding: 3rem 2rem; color: var(--muted); font-size: 0.78rem; }
   .empty-state .big { font-family: 'Fraunces', serif; font-size: 2.5rem; color: var(--border); margin-bottom: 0.5rem; }
+
+  .nav-arrows {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+  }
+  .nav-arrows-group { display: flex; gap: 0.4rem; }
+  .nav-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    height: 36px;
+    padding: 0 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    display: flex; align-items: center; gap: 0.4rem;
+    transition: all 0.15s;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(200,240,78,0.07); }
+  .nav-btn:active { transform: scale(0.96); }
+  .nav-btn .arrow { font-size: 1.1rem; line-height: 1; }
+  .nav-btn .now-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); display: inline-block;
+  }
 </style>
 </head>
 <body>
@@ -204,6 +236,17 @@
         <div class="legend-item"><div class="legend-dot work"></div>Business</div>
         <div class="legend-item"><div class="legend-dot sleep"></div>Night</div>
       </div>
+    </div>
+  </div>
+  <div class="nav-arrows">
+    <div class="nav-arrows-group">
+      <button class="nav-btn" id="navLeft2"><span class="arrow">«</span> 2h</button>
+      <button class="nav-btn" id="navLeft1"><span class="arrow">‹</span> 1h</button>
+    </div>
+    <button class="nav-btn" id="navNow"><span class="now-dot"></span> Now</button>
+    <div class="nav-arrows-group">
+      <button class="nav-btn" id="navRight1">1h <span class="arrow">›</span></button>
+      <button class="nav-btn" id="navRight2">2h <span class="arrow">»</span></button>
     </div>
   </div>
   <div class="clocks-area" id="clocksArea">
@@ -252,13 +295,17 @@ const CITIES = [
   { name:'Prague', country:'Czech Republic', tz:'Europe/Prague', abbr:'CET' },
   { name:'Budapest', country:'Hungary', tz:'Europe/Budapest', abbr:'CET' },
   { name:'Bucharest', country:'Romania', tz:'Europe/Bucharest', abbr:'EET' },
+  { name:'Galați', country:'Romania', tz:'Europe/Bucharest', abbr:'EET' },
   { name:'Sofia', country:'Bulgaria', tz:'Europe/Sofia', abbr:'EET' },
   { name:'Athens', country:'Greece', tz:'Europe/Athens', abbr:'EET' },
   { name:'Istanbul', country:'Turkey', tz:'Europe/Istanbul', abbr:'TRT' },
   { name:'Moscow', country:'Russia', tz:'Europe/Moscow', abbr:'MSK' },
+  { name:'Saint Petersburg', country:'Russia', tz:'Europe/Moscow', abbr:'MSK' },
+  { name:'Novosibirsk', country:'Russia', tz:'Asia/Novosibirsk', abbr:'NOVT' },
+  { name:'Yekaterinburg', country:'Russia', tz:'Asia/Yekaterinburg', abbr:'YEKT' },
+  { name:'Vladivostok', country:'Russia', tz:'Asia/Vladivostok', abbr:'VLAT' },
   { name:'Kyiv', country:'Ukraine', tz:'Europe/Kiev', abbr:'EET' },
   { name:'Lisbon', country:'Portugal', tz:'Europe/Lisbon', abbr:'WET' },
-  { name:'Galați', country:'Romania', tz:'Europe/Bucharest', abbr:'EET' },
   { name:'Dubai', country:'UAE', tz:'Asia/Dubai', abbr:'GST' },
   { name:'Riyadh', country:'Saudi Arabia', tz:'Asia/Riyadh', abbr:'AST' },
   { name:'Mumbai', country:'India', tz:'Asia/Kolkata', abbr:'IST' },
@@ -270,6 +317,10 @@ const CITIES = [
   { name:'Hong Kong', country:'China', tz:'Asia/Hong_Kong', abbr:'HKT' },
   { name:'Shanghai', country:'China', tz:'Asia/Shanghai', abbr:'CST' },
   { name:'Beijing', country:'China', tz:'Asia/Shanghai', abbr:'CST' },
+  { name:'Guangzhou', country:'China', tz:'Asia/Shanghai', abbr:'CST' },
+  { name:'Chengdu', country:'China', tz:'Asia/Shanghai', abbr:'CST' },
+  { name:'Wuhan', country:'China', tz:'Asia/Shanghai', abbr:'CST' },
+  { name:'Shenzhen', country:'China', tz:'Asia/Shanghai', abbr:'CST' },
   { name:'Tokyo', country:'Japan', tz:'Asia/Tokyo', abbr:'JST' },
   { name:'Seoul', country:'South Korea', tz:'Asia/Seoul', abbr:'KST' },
   { name:'Taipei', country:'Taiwan', tz:'Asia/Taipei', abbr:'CST' },
@@ -284,6 +335,13 @@ const CITIES = [
   { name:'Tehran', country:'Iran', tz:'Asia/Tehran', abbr:'IRST' },
   { name:'Baghdad', country:'Iraq', tz:'Asia/Baghdad', abbr:'AST' },
   { name:'Cairo', country:'Egypt', tz:'Africa/Cairo', abbr:'EET' },
+  { name:'Alexandria', country:'Egypt', tz:'Africa/Cairo', abbr:'EET' },
+  { name:'Amman', country:'Jordan', tz:'Asia/Amman', abbr:'EET' },
+  { name:'Tel Aviv', country:'Israel', tz:'Asia/Jerusalem', abbr:'IST' },
+  { name:'Jerusalem', country:'Israel', tz:'Asia/Jerusalem', abbr:'IST' },
+  { name:'Riyadh', country:'Saudi Arabia', tz:'Asia/Riyadh', abbr:'AST' },
+  { name:'Jeddah', country:'Saudi Arabia', tz:'Asia/Riyadh', abbr:'AST' },
+  { name:'Mecca', country:'Saudi Arabia', tz:'Asia/Riyadh', abbr:'AST' },
   { name:'Lagos', country:'Nigeria', tz:'Africa/Lagos', abbr:'WAT' },
   { name:'Nairobi', country:'Kenya', tz:'Africa/Nairobi', abbr:'EAT' },
   { name:'Johannesburg', country:'South Africa', tz:'Africa/Johannesburg', abbr:'SAST' },
@@ -454,7 +512,9 @@ function render() {
   // Sync scroll to current slot of first city
   const nowLocal = getHourMinInTZ(Date.now(), cities[0].tz);
   const nowSlot = nowLocal.hour * 2 + (nowLocal.minute >= 30 ? 1 : 0);
-  const scrollTo = Math.max(0, (nowSlot - 3)) * CELL_W;
+  const firstWrapEl = document.getElementById('tlwrap_0');
+  const visibleSlots = firstWrapEl ? Math.floor(firstWrapEl.clientWidth / CELL_W) : 10;
+  const scrollTo = Math.max(0, (nowSlot - Math.floor(visibleSlots / 2))) * CELL_W;
   document.querySelectorAll('.timeline-wrap').forEach(w => { w.scrollLeft = scrollTo; });
 
   // Only first row has the drag logic
@@ -905,6 +965,34 @@ function addTZItem(zone) {
 document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) dropdown.classList.remove('open'); });
 
 // ============================================================
+// SCROLL BUTTONS
+// ============================================================
+function scrollAllBy(px) {
+  document.querySelectorAll('.timeline-wrap').forEach(w => {
+    w.scrollLeft += px;
+  });
+}
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.nav-btn');
+  if (!btn) return;
+  const HOUR = CELL_W * 2; // 2 slots = 1 hour
+  if (btn.id === 'navLeft1')  scrollAllBy(-HOUR);
+  if (btn.id === 'navRight1') scrollAllBy(HOUR);
+  if (btn.id === 'navLeft2')  scrollAllBy(-HOUR * 2);
+  if (btn.id === 'navRight2') scrollAllBy(HOUR * 2);
+  if (btn.id === 'navNow') {
+    if (!cities.length) return;
+    const nowLocal = getHourMinInTZ(Date.now(), cities[0].tz);
+    const nowSlot = nowLocal.hour * 2 + (nowLocal.minute >= 30 ? 1 : 0);
+    const wrap0 = document.getElementById('tlwrap_0');
+    const visibleSlots = wrap0 ? Math.floor(wrap0.clientWidth / CELL_W) : 10;
+    const target = Math.max(0, (nowSlot - Math.floor(visibleSlots / 2))) * CELL_W;
+    document.querySelectorAll('.timeline-wrap').forEach(w => { w.scrollLeft = target; });
+  }
+});
+
+// ============================================================
 // LIVE CLOCK (when no selection)
 // ============================================================
 setInterval(() => {
@@ -928,6 +1016,6 @@ cities = [
 ];
 render();
 </script>
-<div class="build-tag"> build v1.2 (27-feb-26)</div>
+<div class="build-tag">build v1.2 (27-feb-26)</div>
 </body>
 </html>
