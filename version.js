@@ -2,7 +2,7 @@
 // WORLD TIME · CITY CLOCK — Central Version Config
 // ============================================================
 // Edit ONLY this file to update the version across all pages.
-// After changing, just refresh any page — it will pick it up automatically.
+// After changing, just refresh any page — it will pick it up automatically..
 
 const APP_VERSION = "v1.6 - 03:24PM EET";
 const APP_BUILD_DATE = "March 2026";
