@@ -357,6 +357,32 @@ const CITIES = [
   { name:'San Diego', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
   { name:'Orlando', country:'United States', tz:'America/New_York', abbr:'EST' },
   { name:'Salt Lake City', country:'United States', tz:'America/Denver', abbr:'MST' },
+  { name:'Redmond', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
+  { name:'Bellevue', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
+  { name:'Tacoma', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
+  { name:'Spokane', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
+  { name:'Boise', country:'United States', tz:'America/Boise', abbr:'MST' },
+  { name:'Albuquerque', country:'United States', tz:'America/Denver', abbr:'MST' },
+  { name:'Tucson', country:'United States', tz:'America/Phoenix', abbr:'MST' },
+  { name:'Colorado Springs', country:'United States', tz:'America/Denver', abbr:'MST' },
+  { name:'Kansas City', country:'United States', tz:'America/Chicago', abbr:'CST' },
+  { name:'St. Louis', country:'United States', tz:'America/Chicago', abbr:'CST' },
+  { name:'Indianapolis', country:'United States', tz:'America/Indiana/Indianapolis', abbr:'EST' },
+  { name:'Columbus', country:'United States', tz:'America/New_York', abbr:'EST' },
+  { name:'Cleveland', country:'United States', tz:'America/New_York', abbr:'EST' },
+  { name:'Pittsburgh', country:'United States', tz:'America/New_York', abbr:'EST' },
+  { name:'Charlotte', country:'United States', tz:'America/New_York', abbr:'EST' },
+  { name:'Raleigh', country:'United States', tz:'America/New_York', abbr:'EST' },
+  { name:'Memphis', country:'United States', tz:'America/Chicago', abbr:'CST' },
+  { name:'Louisville', country:'United States', tz:'America/Kentucky/Louisville', abbr:'EST' },
+  { name:'New Orleans', country:'United States', tz:'America/Chicago', abbr:'CST' },
+  { name:'Austin', country:'United States', tz:'America/Chicago', abbr:'CST' },
+  { name:'San Antonio', country:'United States', tz:'America/Chicago', abbr:'CST' },
+  { name:'Sacramento', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
+  { name:'San Jose', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
+  { name:'Oakland', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
+  { name:'Fresno', country:'United States', tz:'America/Los_Angeles', abbr:'PST' },
+  { name:'Juneau', country:'United States', tz:'America/Juneau', abbr:'AKST' },
   { name:'London', country:'United Kingdom', tz:'Europe/London', abbr:'GMT' },
   { name:'Paris', country:'France', tz:'Europe/Paris', abbr:'CET' },
   { name:'Berlin', country:'Germany', tz:'Europe/Berlin', abbr:'CET' },
@@ -1162,17 +1188,17 @@ function savePrefs() {
 function loadPrefs() {
   try {
     const raw = localStorage.getItem('worldtime_cities');
-    if (!raw) return false;
+    if (raw === null) return false;
     const saved = JSON.parse(raw);
-    if (!Array.isArray(saved) || saved.length === 0) return false;
+    if (!Array.isArray(saved)) return false;
+    if (saved.length === 0) { cities = []; homeIdx = -1; return true; }
     const loaded = saved
       .map(s => CITIES.find(c => c.name === s.name && c.tz === s.tz))
       .filter(Boolean);
-    if (loaded.length === 0) return false;
     cities = loaded;
     const savedHome = localStorage.getItem('worldtime_home');
     homeIdx = savedHome !== null ? parseInt(savedHome) : 0;
-    if (homeIdx >= cities.length) homeIdx = 0;
+    if (homeIdx >= cities.length) homeIdx = cities.length > 0 ? 0 : -1;
     return true;
   } catch(e) { return false; }
 }
