@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Time · Cookies & Privacy</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e12;
+  --surface: #16161d;
+  --surface2: #1e1e28;
+  --border: #2a2a38;
+  --accent: #c8f04e;
+  --accent2: #f04e7a;
+  --text: #e8e8f0;
+  --muted: #6868a0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  line-height: 1.7;
+}
+
+header {
+  padding: 1.4rem 2rem;
+  display: flex; align-items: center; gap: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+header h1 {
+  font-family: 'Fraunces', serif; font-size: 1.35rem;
+  font-weight: 300; color: var(--accent); letter-spacing: -0.02em;
+}
+header .sub { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+.site-nav { display: flex; gap: 0.5rem; margin-left: auto; align-items: center; }
+.site-nav a {
+  font-size: 0.62rem; color: var(--muted); letter-spacing: 0.12em;
+  text-transform: uppercase; text-decoration: none;
+  padding: 0.22rem 0.55rem; border: 1px solid transparent;
+  border-radius: 4px; transition: all 0.15s;
+}
+.site-nav a:hover { color: var(--accent); border-color: var(--accent); }
+.site-nav a.active { color: var(--accent); border-color: var(--border); }
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 3rem 2rem 5rem;
+}
+
+.page-label {
+  font-size: 0.6rem; color: var(--accent); letter-spacing: 0.2em;
+  text-transform: uppercase; margin-bottom: 0.6rem;
+}
+
+.page-title {
+  font-family: 'Fraunces', serif;
+  font-size: 2.4rem; font-weight: 700;
+  letter-spacing: -0.03em; line-height: 1.1;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.page-date {
+  font-size: 0.62rem; color: var(--muted);
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 2.5rem;
+}
+.toc-label {
+  font-size: 0.58rem; color: var(--muted); letter-spacing: 0.15em;
+  text-transform: uppercase; margin-bottom: 0.7rem;
+}
+.toc a {
+  display: block; font-size: 0.72rem; color: var(--muted);
+  text-decoration: none; padding: 0.2rem 0;
+  transition: color 0.15s;
+  counter-increment: toc;
+}
+.toc a::before {
+  content: "0" counter(toc) " — ";
+  color: var(--border);
+}
+.toc { counter-reset: toc; }
+.toc a:hover { color: var(--accent); }
+
+section {
+  margin-bottom: 2.8rem;
+}
+
+.section-num {
+  font-size: 0.58rem; color: var(--accent); letter-spacing: 0.15em;
+  text-transform: uppercase; margin-bottom: 0.4rem;
+}
+
+h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.3rem; font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 1rem;
+  color: var(--text);
+}
+
+p {
+  font-size: 0.78rem; color: var(--muted);
+  margin-bottom: 0.9rem;
+}
+p strong { color: var(--text); font-weight: 500; }
+
+.highlight-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 1rem 1.2rem;
+  margin: 1.2rem 0;
+  font-size: 0.75rem;
+  color: var(--text);
+}
+.highlight-box.warn {
+  border-left-color: var(--accent2);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 1.2rem;
+  font-size: 0.72rem;
+}
+.data-table th {
+  text-align: left; padding: 0.55rem 0.8rem;
+  font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+.data-table td {
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  vertical-align: top;
+  color: var(--muted);
+}
+.data-table td:first-child { color: var(--text); font-weight: 500; }
+.data-table tr:hover td { background: var(--surface); }
+
+.tag {
+  display: inline-block; font-size: 0.55rem; padding: 0.1rem 0.35rem;
+  border-radius: 3px; letter-spacing: 0.08em; text-transform: uppercase;
+  font-weight: 500; vertical-align: middle; margin-left: 0.3rem;
+}
+.tag.safe { background: rgba(200,240,78,0.12); color: var(--accent); border: 1px solid rgba(200,240,78,0.3); }
+.tag.none { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+.tag.external { background: rgba(240,78,122,0.1); color: var(--accent2); border: 1px solid rgba(240,78,122,0.25); }
+
+ul {
+  list-style: none; margin: 0.5rem 0 1rem;
+}
+ul li {
+  font-size: 0.75rem; color: var(--muted);
+  padding: 0.2rem 0 0.2rem 1.2rem;
+  position: relative;
+}
+ul li::before {
+  content: '—';
+  position: absolute; left: 0;
+  color: var(--border);
+}
+ul li strong { color: var(--text); }
+
+.back-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em;
+  text-transform: uppercase; text-decoration: none;
+  padding: 0.35rem 0.8rem; border: 1px solid var(--border);
+  border-radius: 4px; transition: all 0.15s; margin-top: 1rem;
+}
+.back-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+.build-tag {
+  position: fixed; bottom: 1rem; right: 1.2rem;
+  font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em;
+  text-transform: uppercase; pointer-events: none; z-index: 999;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>World Time</h1>
+  <span class="sub">city clock</span>
+  <nav class="site-nav">
+    <a href="timezone-converter.html">App</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="cookies.html" class="active">Cookies</a>
+  </nav>
+</header>
+
+<div class="page">
+  <div class="page-label">Legal & Privacy</div>
+  <h1 class="page-title">Cookies &<br>Privacy Policy</h1>
+  <div class="page-date">Last updated: March 2026 &nbsp;·&nbsp; World Time · City Clock</div>
+
+  <div class="toc">
+    <div class="toc-label">On this page</div>
+    <a href="#summary">Short summary</a>
+    <a href="#what-we-store">What we store</a>
+    <a href="#cookies">Cookies explained</a>
+    <a href="#localstorage">localStorage vs cookies</a>
+    <a href="#third-party">Third-party services</a>
+    <a href="#your-rights">Your rights</a>
+    <a href="#contact">Contact</a>
+  </div>
+
+  <!-- SUMMARY -->
+  <section id="summary">
+    <div class="section-num">01</div>
+    <h2>Short summary</h2>
+    <div class="highlight-box">
+      This website does <strong>not</strong> use tracking cookies, advertising cookies, or collect any personal data. The only data stored on your device is your saved city list, kept locally in your browser using <strong>localStorage</strong> — it never leaves your device.
+    </div>
+    <p>If you're looking for the quick answer: we don't track you, we don't sell data, and nothing is sent to any server when you use this app.</p>
+  </section>
+
+  <!-- WHAT WE STORE -->
+  <section id="what-we-store">
+    <div class="section-num">02</div>
+    <h2>What we store on your device</h2>
+    <p>The following table lists everything this app stores in your browser:</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Type</th>
+          <th>What it contains</th>
+          <th>Expires</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>worldtime_cities <span class="tag safe">safe</span></td>
+          <td>localStorage</td>
+          <td>The list of cities you added to your board (name + timezone). Example: <code style="color:var(--accent);font-size:0.68rem">[{"name":"Bucharest","tz":"Europe/Bucharest"}]</code></td>
+          <td>Until you clear browser data</td>
+        </tr>
+        <tr>
+          <td>Cookies <span class="tag none">none</span></td>
+          <td>—</td>
+          <td>This app sets no cookies whatsoever</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>That's the complete list. No hidden keys, no fingerprinting, no analytics identifiers.</p>
+  </section>
+
+  <!-- COOKIES -->
+  <section id="cookies">
+    <div class="section-num">03</div>
+    <h2>Cookies explained</h2>
+    <p>A <strong>cookie</strong> is a small text file that a website can store in your browser. Cookies can be used for many purposes — some useful, some privacy-invasive:</p>
+    <ul>
+      <li><strong>Session cookies</strong> — keep you logged in while browsing. Deleted when you close the browser.</li>
+      <li><strong>Persistent cookies</strong> — stay on your device for a set duration, used to remember preferences.</li>
+      <li><strong>Tracking cookies</strong> — follow your behaviour across websites to build advertising profiles.</li>
+      <li><strong>Analytics cookies</strong> — count visits and measure how people use a site.</li>
+    </ul>
+    <div class="highlight-box warn">
+      World Time · City Clock sets <strong>zero cookies</strong> of any kind. You can verify this yourself by opening your browser's developer tools (F12) → Application → Cookies.
+    </div>
+  </section>
+
+  <!-- LOCALSTORAGE -->
+  <section id="localstorage">
+    <div class="section-num">04</div>
+    <h2>localStorage vs cookies</h2>
+    <p>We use <strong>localStorage</strong> instead of cookies to save your preferences. Here's how they differ:</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>localStorage</th>
+          <th>Cookie</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sent to server</td>
+          <td style="color:#74e09c">Never — stays on your device</td>
+          <td style="color:var(--accent2)">Yes, with every request</td>
+        </tr>
+        <tr>
+          <td>Can track you</td>
+          <td style="color:#74e09c">No</td>
+          <td style="color:var(--accent2)">Yes, if used for tracking</td>
+        </tr>
+        <tr>
+          <td>Expiry</td>
+          <td>Until you clear browser storage</td>
+          <td>Set by website (days, years)</td>
+        </tr>
+        <tr>
+          <td>Storage limit</td>
+          <td>~5MB</td>
+          <td>~4KB</td>
+        </tr>
+        <tr>
+          <td>Accessible by</td>
+          <td>Only this page, on this device</td>
+          <td>Server + browser</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Because localStorage is never transmitted to any server, your city list stays completely private on your own device.</p>
+
+    <p>To <strong>clear your saved preferences</strong>, you can either remove cities manually using the ✕ button in the app, or clear your browser's site data for this page:</p>
+    <ul>
+      <li><strong>Chrome / Edge</strong> — F12 → Application → Storage → Clear site data</li>
+      <li><strong>Firefox</strong> — F12 → Storage → Local Storage → right-click → Delete All</li>
+      <li><strong>Safari</strong> — Preferences → Privacy → Manage Website Data</li>
+    </ul>
+  </section>
+
+  <!-- THIRD PARTY -->
+  <section id="third-party">
+    <div class="section-num">05</div>
+    <h2>Third-party services</h2>
+    <p>The only external service this page contacts is <strong>Google Fonts</strong>, used to load the DM Mono and Fraunces typefaces.</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Purpose</th>
+          <th>Data sent</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Google Fonts <span class="tag external">external</span></td>
+          <td>Load custom fonts (DM Mono, Fraunces)</td>
+          <td>Your IP address and browser info are sent to Google's servers as part of the font request. Google's own privacy policy applies.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>No analytics platforms, no advertising networks, no social media trackers, no CDN scripts beyond fonts are loaded by this application.</p>
+    <p>If you want to prevent the Google Fonts request entirely, you can use a browser extension that blocks font CDNs, or run the page offline after caching.</p>
+  </section>
+
+  <!-- YOUR RIGHTS -->
+  <section id="your-rights">
+    <div class="section-num">06</div>
+    <h2>Your rights</h2>
+    <p>Since we don't collect any personal data, there is no data of yours held by us to request, correct, or delete. Your only stored data is the city list in your own browser's localStorage — which you fully control and can delete at any time as described above.</p>
+    <ul>
+      <li><strong>Right to access</strong> — your data is already visible to you in the app.</li>
+      <li><strong>Right to deletion</strong> — clear it yourself via browser dev tools, or remove all cities using the ✕ buttons.</li>
+      <li><strong>Right to portability</strong> — not applicable; no data is held server-side.</li>
+    </ul>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-num">07</div>
+    <h2>Contact</h2>
+    <p>If you have any questions about this privacy policy or how the application handles data, you are welcome to reach out. Since this is a personal tool, there is no formal data controller, but we're happy to clarify anything.</p>
+  </section>
+
+  <a href="timezone-converter.html" class="back-btn">← Back to app</a>
+</div>
+
+<div class="build-tag">v1.1.0</div>
+</body>
+</html>
