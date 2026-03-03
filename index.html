@@ -1,13 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "vpx3w14ibw");
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>World Time · City Clock</title>
@@ -168,7 +161,24 @@
   .offset-badge { font-size: 0.6rem; color: var(--muted); }
   .offset-badge.pos { color: #74e09c; }
   .offset-badge.neg { color: var(--accent2); }
-  .home-icon { position: absolute; right: 0.7rem; top: 0.5rem; font-size: 0.65rem; color: var(--accent); opacity: 0.5; }
+  .home-btn {
+    position: absolute; right: 0.7rem; top: 0.45rem;
+    background: none; border: none; cursor: pointer;
+    font-size: 0.78rem; line-height: 1; padding: 0.1rem;
+    border-radius: 3px; transition: all 0.15s;
+    color: var(--muted); opacity: 0.4;
+  }
+  .home-btn:hover { opacity: 1; transform: scale(1.15); }
+  .home-btn.is-home { color: var(--accent); opacity: 1; }
+  .home-btn .home-tip {
+    position: absolute; right: 120%; top: 50%; transform: translateY(-50%);
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-size: 0.58rem; white-space: nowrap;
+    padding: 0.2rem 0.5rem; border-radius: 4px; pointer-events: none;
+    opacity: 0; transition: opacity 0.15s; font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+  .home-btn:hover .home-tip { opacity: 1; }
   .remove-btn {
     background: none; border: none; color: var(--muted); cursor: pointer;
     font-size: 0.75rem; position: absolute; right: 0.7rem; bottom: 0.5rem;
@@ -451,6 +461,7 @@ const CITIES = [
 // STATE
 // ============================================================
 let cities = [];
+let homeIdx = 0; // index of the "home" city — cannot be deleted
 let anchorDay = new Date();
 anchorDay.setHours(0, 0, 0, 0);
 
@@ -474,7 +485,7 @@ const SLOT_MINS = 30;   // minutes per slot
  */
 function getSlotUTCMs() {
   if (!cities.length) return [];
-  const tz = cities[0].tz;
+  const tz = (cities[homeIdx] || cities[0]).tz;
   const ymd = anchorDay.toLocaleDateString('en-CA'); // YYYY-MM-DD
   const slots = [];
   for (let s = 0; s < SLOTS; s++) {
@@ -545,9 +556,10 @@ function fmt12plain(h, m) {
 }
 
 function getOffsetLabel(cityTz) {
-  // Compare UTC offset between first city and this city right now
+  // Compare UTC offset between home city and this city right now
   const nowMs = Date.now();
-  const h0 = getHourMinInTZ(nowMs, cities[0].tz);
+  const refCity = cities[homeIdx] || cities[0];
+  const h0 = getHourMinInTZ(nowMs, refCity.tz);
   const hN = getHourMinInTZ(nowMs, cityTz);
   let diffMin = (hN.hour * 60 + hN.minute) - (h0.hour * 60 + h0.minute);
   if (diffMin > 12 * 60) diffMin -= 24 * 60;
@@ -556,7 +568,7 @@ function getOffsetLabel(cityTz) {
   const sign = diffH >= 0 ? '+' : '';
   const cls = diffH > 0 ? 'pos' : diffH < 0 ? 'neg' : '';
   const disp = Number.isInteger(diffH) ? `${sign}${diffH}h` : `${sign}${diffH.toFixed(1).replace('.0','')}h`;
-  return `<span class="offset-badge ${cls}">${disp} vs ${cities[0].name}</span>`;
+  return `<span class="offset-badge ${cls}">${disp} vs ${refCity.name}</span>`;
 }
 
 // ============================================================
@@ -579,7 +591,7 @@ function render() {
   updateRangeInfo();
 
   // Sync scroll to current slot of first city
-  const nowLocal = getHourMinInTZ(Date.now(), cities[0].tz);
+  const nowLocal = getHourMinInTZ(Date.now(), (cities[homeIdx] || cities[0]).tz);
   const nowSlot = nowLocal.hour * 2 + (nowLocal.minute >= 30 ? 1 : 0);
   const firstWrapEl = document.getElementById('tlwrap_0');
   const visibleSlots = firstWrapEl ? Math.floor(firstWrapEl.clientWidth / CELL_W) : 10;
@@ -601,30 +613,67 @@ function buildRow(city, idx) {
   const info = document.createElement('div');
   info.className = 'city-info';
 
-  if (idx === 0) {
-    info.innerHTML += `<span class="home-icon">⌂</span>`;
-  } else {
-    info.innerHTML += getOffsetLabel(city.tz);
+  // Home button — use only createElement to preserve event listeners
+  const homeBtn = document.createElement('button');
+  homeBtn.className = 'home-btn' + (idx === homeIdx ? ' is-home' : '');
+  homeBtn.title = idx === homeIdx ? 'Home city — click to unset' : 'Set as home city';
+  homeBtn.textContent = '\u2302';
+  const homeTip = document.createElement('span');
+  homeTip.className = 'home-tip';
+  homeTip.textContent = idx === homeIdx ? 'Unset home' : 'Set as home';
+  homeBtn.appendChild(homeTip);
+  homeBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    homeIdx = (homeIdx === idx) ? -1 : idx;
+    savePrefs();
+    render();
+  });
+  info.appendChild(homeBtn);
+
+  // Offset label for non-home cities
+  if (idx !== homeIdx && homeIdx >= 0 && homeIdx < cities.length) {
+    const offWrap = document.createElement('div');
+    offWrap.innerHTML = getOffsetLabel(city.tz);
+    info.appendChild(offWrap.firstChild);
   }
 
-  info.innerHTML += `
-    <div class="city-name-big">${city.name} <span class="tz-tag">${city.abbr}</span></div>
-    <div class="country-label">${city.country}</div>
-  `;
+  // City name
+  const nameDiv = document.createElement('div');
+  nameDiv.className = 'city-name-big';
+  nameDiv.innerHTML = city.name + ' <span class="tz-tag">' + city.abbr + '</span>';
+  info.appendChild(nameDiv);
 
+  // Country
+  const countryDiv = document.createElement('div');
+  countryDiv.className = 'country-label';
+  countryDiv.textContent = city.country;
+  info.appendChild(countryDiv);
+
+  // Range label
   const rangeDiv = document.createElement('div');
   rangeDiv.className = 'range-time-label';
-  rangeDiv.id = `rlabel_${idx}`;
+  rangeDiv.id = 'rlabel_' + idx;
   info.appendChild(rangeDiv);
   updateRangeLabelEl(rangeDiv, idx);
 
-  if (idx > 0) {
-    const rb = document.createElement('button');
-    rb.className = 'remove-btn';
-    rb.textContent = '✕';
-    rb.addEventListener('click', e => { e.stopPropagation(); cities.splice(idx, 1); selStart = null; selEnd = null; savePrefs(); render(); });
-    info.appendChild(rb);
+  // Remove button — hidden for home city
+  const rb = document.createElement('button');
+  rb.className = 'remove-btn';
+  rb.textContent = '\u2715';
+  if (idx === homeIdx) {
+    rb.style.display = 'none';
+    rb.disabled = true;
   }
+  rb.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (idx === homeIdx) return;
+    if (homeIdx > idx) homeIdx--;
+    cities.splice(idx, 1);
+    selStart = null; selEnd = null;
+    savePrefs(); render();
+  });
+  info.appendChild(rb);
 
   // --- Timeline ---
   const tlWrap = document.createElement('div');
@@ -1052,7 +1101,7 @@ document.addEventListener('click', e => {
   if (btn.id === 'navRight2') scrollAllBy(HOUR * 2);
   if (btn.id === 'navNow') {
     if (!cities.length) return;
-    const nowLocal = getHourMinInTZ(Date.now(), cities[0].tz);
+    const nowLocal = getHourMinInTZ(Date.now(), (cities[homeIdx] || cities[0]).tz);
     const nowSlot = nowLocal.hour * 2 + (nowLocal.minute >= 30 ? 1 : 0);
     const wrap0 = document.getElementById('tlwrap_0');
     const visibleSlots = wrap0 ? Math.floor(wrap0.clientWidth / CELL_W) : 10;
@@ -1099,6 +1148,7 @@ function savePrefs() {
   try {
     const saved = cities.map(c => ({ name: c.name, tz: c.tz }));
     localStorage.setItem('worldtime_cities', JSON.stringify(saved));
+    localStorage.setItem('worldtime_home', String(homeIdx));
     // Show toast
     const toast = document.getElementById('toast');
     if (toast) {
@@ -1120,6 +1170,9 @@ function loadPrefs() {
       .filter(Boolean);
     if (loaded.length === 0) return false;
     cities = loaded;
+    const savedHome = localStorage.getItem('worldtime_home');
+    homeIdx = savedHome !== null ? parseInt(savedHome) : 0;
+    if (homeIdx >= cities.length) homeIdx = 0;
     return true;
   } catch(e) { return false; }
 }
