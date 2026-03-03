@@ -35,6 +35,26 @@
     font-weight: 300; color: var(--accent); letter-spacing: -0.02em;
   }
   header span { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+  .toast {
+    position: fixed; bottom: 2.8rem; right: 1.2rem;
+    background: var(--surface2); border: 1px solid var(--accent);
+    color: var(--accent); font-size: 0.62rem; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 0.3rem 0.7rem; border-radius: 4px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 1000;
+  }
+  .toast.show { opacity: 1; }
+  .site-nav {
+    display: flex; gap: 0.5rem; margin-left: auto; align-items: center;
+  }
+  .site-nav a {
+    font-size: 0.62rem; color: var(--muted); letter-spacing: 0.12em;
+    text-transform: uppercase; text-decoration: none;
+    padding: 0.22rem 0.55rem; border: 1px solid transparent;
+    border-radius: 4px; transition: all 0.15s;
+  }
+  .site-nav a:hover { color: var(--accent); border-color: var(--accent); }
   .build-tag {
     position: fixed; bottom: 1rem; right: 1.2rem;
     font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase;
@@ -220,6 +240,10 @@
 <header>
   <h1>World Time</h1>
   <span>city clock</span>
+  <nav class="site-nav">
+    <a href="changelog.html">Changelog</a>
+    <a href="cookies.html">Cookies</a>
+  </nav>
   <div class="date-nav" id="dateNav"></div>
 </header>
 
@@ -553,7 +577,7 @@ function buildRow(city, idx) {
     const rb = document.createElement('button');
     rb.className = 'remove-btn';
     rb.textContent = '✕';
-    rb.addEventListener('click', e => { e.stopPropagation(); cities.splice(idx, 1); selStart = null; selEnd = null; render(); });
+    rb.addEventListener('click', e => { e.stopPropagation(); cities.splice(idx, 1); selStart = null; selEnd = null; savePrefs(); render(); });
     info.appendChild(rb);
   }
 
@@ -916,7 +940,7 @@ input.addEventListener('input', () => {
       item.className = 'dropdown-item';
       item.innerHTML = `<span>${city.name}, ${city.country}</span><span class="tz-label">${city.abbr}<span class="tz-type">city</span></span>`;
       item.addEventListener('click', () => {
-        if (!cities.find(c => c.name === city.name)) { cities.push(city); render(); }
+        if (!cities.find(c => c.name === city.name)) { cities.push(city); savePrefs(); render(); }
         input.value = ''; dropdown.classList.remove('open');
       });
       dropdown.appendChild(item);
@@ -956,7 +980,7 @@ function addTZItem(zone) {
   item.className = 'dropdown-item';
   item.innerHTML = `<span>${zone.label} <span style="color:var(--muted);font-size:0.65rem">${zone.tz}</span></span><span class="tz-label">${zone.abbr.split('/')[0]} ${zone.offset}<span class="tz-type tz-zone">tz</span></span>`;
   item.addEventListener('click', () => {
-    if (!cities.find(c => c.tz === city.tz && c.name === city.name)) { cities.push(city); render(); }
+    if (!cities.find(c => c.tz === city.tz && c.name === city.name)) { cities.push(city); savePrefs(); render(); }
     input.value = ''; dropdown.classList.remove('open');
   });
   dropdown.appendChild(item);
@@ -1004,18 +1028,54 @@ setInterval(() => {
 }, 1000);
 
 // ============================================================
+// SAVE / LOAD PREFERENCES (localStorage)
+// ============================================================
+function savePrefs() {
+  try {
+    const saved = cities.map(c => ({ name: c.name, tz: c.tz }));
+    localStorage.setItem('worldtime_cities', JSON.stringify(saved));
+    // Show toast
+    const toast = document.getElementById('toast');
+    if (toast) {
+      toast.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+  } catch(e) {}
+}
+
+function loadPrefs() {
+  try {
+    const raw = localStorage.getItem('worldtime_cities');
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (!Array.isArray(saved) || saved.length === 0) return false;
+    const loaded = saved
+      .map(s => CITIES.find(c => c.name === s.name && c.tz === s.tz))
+      .filter(Boolean);
+    if (loaded.length === 0) return false;
+    cities = loaded;
+    return true;
+  } catch(e) { return false; }
+}
+
+// ============================================================
 // INIT
 // ============================================================
 buildDateNav();
-cities = [
-  CITIES.find(c => c.name === 'Bucharest'),
-  CITIES.find(c => c.name === 'London'),
-  CITIES.find(c => c.name === 'New York'),
-  CITIES.find(c => c.name === 'Mumbai'),
-  CITIES.find(c => c.name === 'Tokyo'),
-];
+const hadSaved = loadPrefs();
+if (!hadSaved) {
+  cities = [
+    CITIES.find(c => c.name === 'Bucharest'),
+    CITIES.find(c => c.name === 'London'),
+    CITIES.find(c => c.name === 'New York'),
+    CITIES.find(c => c.name === 'Mumbai'),
+    CITIES.find(c => c.name === 'Tokyo'),
+  ].filter(Boolean);
+}
 render();
 </script>
-<div class="build-tag">build v1.3 (14:46 27-feb-26)</div>
+<div class="toast" id="toast">Preferences saved</div>
+<div class="build-tag">build v1.4 (10:54)</div>
 </body>
 </html>
