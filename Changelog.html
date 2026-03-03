@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Time · Changelog</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e12;
+  --surface: #16161d;
+  --surface2: #1e1e28;
+  --border: #2a2a38;
+  --accent: #c8f04e;
+  --accent2: #f04e7a;
+  --text: #e8e8f0;
+  --muted: #6868a0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  line-height: 1.7;
+}
+
+header {
+  padding: 1.4rem 2rem;
+  display: flex; align-items: center; gap: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+header h1 {
+  font-family: 'Fraunces', serif; font-size: 1.35rem;
+  font-weight: 300; color: var(--accent); letter-spacing: -0.02em;
+}
+header .sub { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+.site-nav { display: flex; gap: 0.5rem; margin-left: auto; align-items: center; }
+.site-nav a {
+  font-size: 0.62rem; color: var(--muted); letter-spacing: 0.12em;
+  text-transform: uppercase; text-decoration: none;
+  padding: 0.22rem 0.55rem; border: 1px solid transparent;
+  border-radius: 4px; transition: all 0.15s;
+}
+.site-nav a:hover { color: var(--accent); border-color: var(--accent); }
+.site-nav a.active { color: var(--accent); border-color: var(--border); }
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 3rem 2rem 5rem;
+}
+
+.page-label {
+  font-size: 0.6rem; color: var(--accent); letter-spacing: 0.2em;
+  text-transform: uppercase; margin-bottom: 0.6rem;
+}
+.page-title {
+  font-family: 'Fraunces', serif;
+  font-size: 2.4rem; font-weight: 700;
+  letter-spacing: -0.03em; line-height: 1.1;
+  margin-bottom: 0.5rem;
+}
+.page-subtitle {
+  font-size: 0.72rem; color: var(--muted);
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Timeline layout */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+.release {
+  position: relative;
+  margin-bottom: 3rem;
+  animation: fadeIn 0.4s ease both;
+}
+.release::before {
+  content: '';
+  position: absolute;
+  left: -2.35rem; top: 0.35rem;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  border: 2px solid var(--bg);
+}
+.release.latest::before {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(200,240,78,0.15);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.release-header {
+  display: flex; align-items: baseline; gap: 0.8rem;
+  margin-bottom: 0.9rem; flex-wrap: wrap;
+}
+.version {
+  font-family: 'Fraunces', serif;
+  font-size: 1.3rem; font-weight: 700;
+  letter-spacing: -0.02em; color: var(--text);
+}
+.release.latest .version { color: var(--accent); }
+
+.release-date {
+  font-size: 0.62rem; color: var(--muted);
+  letter-spacing: 0.08em;
+}
+.release-tag {
+  font-size: 0.55rem; padding: 0.08rem 0.4rem;
+  border-radius: 3px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 500; margin-left: auto;
+}
+.release-tag.major { background: rgba(200,240,78,0.12); color: var(--accent); border: 1px solid rgba(200,240,78,0.3); }
+.release-tag.minor { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+.release-tag.patch { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+
+.release-desc {
+  font-size: 0.75rem; color: var(--muted);
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.release-desc p { margin: 0; }
+
+.changes { list-style: none; }
+.change {
+  display: flex; gap: 0.75rem; align-items: flex-start;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 0.73rem;
+}
+.change:last-child { border-bottom: none; }
+.change-type {
+  font-size: 0.55rem; padding: 0.1rem 0.4rem;
+  border-radius: 3px; letter-spacing: 0.08em; text-transform: uppercase;
+  font-weight: 500; white-space: nowrap; margin-top: 0.12rem;
+  flex-shrink: 0;
+}
+.change-type.new { background: rgba(200,240,78,0.12); color: var(--accent); border: 1px solid rgba(200,240,78,0.25); }
+.change-type.fix { background: rgba(240,78,122,0.1); color: var(--accent2); border: 1px solid rgba(240,78,122,0.25); }
+.change-type.improve { background: rgba(116,160,224,0.1); color: #74a0e0; border: 1px solid rgba(116,160,224,0.25); }
+.change-type.remove { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+.change-text { color: var(--muted); line-height: 1.5; }
+.change-text strong { color: var(--text); font-weight: 500; }
+
+.back-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em;
+  text-transform: uppercase; text-decoration: none;
+  padding: 0.35rem 0.8rem; border: 1px solid var(--border);
+  border-radius: 4px; transition: all 0.15s; margin-top: 2rem;
+  display: inline-block;
+}
+.back-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+.build-tag {
+  position: fixed; bottom: 1rem; right: 1.2rem;
+  font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em;
+  text-transform: uppercase; pointer-events: none; z-index: 999;
+}
+
+/* How to edit hint */
+.edit-hint {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--muted);
+  border-radius: 0 6px 6px 0;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 2.5rem;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.edit-hint strong { color: var(--text); }
+.edit-hint code {
+  background: var(--surface2); padding: 0.1rem 0.35rem;
+  border-radius: 3px; font-size: 0.68rem; color: var(--accent);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>World Time</h1>
+  <span class="sub">city clock</span>
+  <nav class="site-nav">
+    <a href="timezone-converter.html">App</a>
+    <a href="changelog.html" class="active">Changelog</a>
+    <a href="cookies.html">Cookies</a>
+  </nav>
+</header>
+
+<div class="page">
+  <div class="page-label">Release History</div>
+  <h1 class="page-title">Changelog</h1>
+  <p class="page-subtitle">All notable changes to World Time · City Clock, most recent first.</p>
+
+  <div class="edit-hint">
+    <strong>How to add a new entry:</strong> Open this file in a text editor, copy an existing <code>&lt;div class="release"&gt;</code> block, paste it at the top of the <code>&lt;div class="timeline"&gt;</code>, and update the version, date, and change items. Set <code>class="release latest"</code> on the newest entry only.
+  </div>
+
+  <div class="timeline">
+
+    <!-- ===================== ADD NEW RELEASES AT THE TOP ===================== -->
+
+    <div class="release latest">
+      <div class="release-header">
+        <span class="version">v1.1.0</span>
+        <span class="release-date">March 2026</span>
+        <span class="release-tag major">Major</span>
+      </div>
+      <div class="release-desc"><p>Preferences persistence, navigation arrows, timezone search, and a large batch of new cities added across all regions.</p></div>
+      <ul class="changes">
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>Saved preferences</strong> — your city list is now automatically saved to localStorage and restored on every visit.</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>Navigation arrows</strong> — « ‹ Now › » buttons above the timeline let users scroll left/right by 1h or 2h, and jump to current time.</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>Timezone search</strong> — search by timezone abbreviation (EET, JST, IST), UTC offset (UTC+2, GMT-5), or IANA name (Asia/Tokyo).</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>30-minute slots</strong> — timeline now shows 48 half-hour slots per day instead of 24 hourly slots for finer selection.</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>New cities added</strong> — Jordan (Amman), Israel (Tel Aviv, Jerusalem), Saudi Arabia (Jeddah, Mecca), China (Guangzhou, Chengdu, Wuhan, Shenzhen), Russia (Saint Petersburg, Novosibirsk, Yekaterinburg, Vladivostok), Mauritius (Port Louis), Romania (Galați), plus 12 new US cities and 15 African cities.</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>Cookies & Changelog pages</strong> — dedicated pages explaining data usage and tracking release history.</span></li>
+        <li class="change"><span class="change-type fix">fix</span><span class="change-text"><strong>Now button centering</strong> — pressing "Now" now correctly centers the current time in the middle of the visible timeline.</span></li>
+        <li class="change"><span class="change-type improve">improve</span><span class="change-text"><strong>Business hours highlight</strong> — green highlight now runs precisely from 9:00am to 6:00pm (excluding 6:30pm slot).</span></li>
+        <li class="change"><span class="change-type improve">improve</span><span class="change-text"><strong>Toast notification</strong> — small "Preferences saved" confirmation appears when city list is updated.</span></li>
+        <li class="change"><span class="change-type improve">improve</span><span class="change-text"><strong>Site navigation</strong> — header now includes links between App, Changelog, and Cookies pages.</span></li>
+      </ul>
+    </div>
+
+    <div class="release">
+      <div class="release-header">
+        <span class="version">v1.0.0</span>
+        <span class="release-date">February 2026</span>
+        <span class="release-tag major">Initial release</span>
+      </div>
+      <div class="release-desc"><p>First version of World Time · City Clock. Core timezone conversion with city search and draggable time range selector.</p></div>
+      <ul class="changes">
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>City search</strong> — search and add cities from a database of 70+ cities worldwide.</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>Timezone conversion</strong> — all timelines correctly convert using UTC-based slot mapping, including half-hour offset zones like IST (UTC+5:30).</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>Draggable range selector</strong> — click and drag across any row to select a time range; all cities show the equivalent window simultaneously.</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>Business & night hours</strong> — green highlight for 9am–6pm, red for night hours (before 7am and after 10pm).</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>Date navigation</strong> — browse across days using the date bar in the header.</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>Synchronized scrolling</strong> — all city rows scroll together in sync.</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>Live clock</strong> — current time updates in the city info panel when no range is selected.</span></li>
+        <li class="change"><span class="change-type new">new</span><span class="change-text"><strong>Offset labels</strong> — each city shows its hour difference relative to the first city in the list.</span></li>
+      </ul>
+    </div>
+
+    <!-- ===================== END OF RELEASES ===================== -->
+
+  </div>
+
+  <a href="timezone-converter.html" class="back-btn">← Back to app</a>
+</div>
+
+<div class="build-tag">v1.1.0</div>
+</body>
+</html>
