@@ -31,8 +31,6 @@
     --text: #1a1a1a; --muted: #7a7a6a;
   }
   *, *::before, *::after { transition: background 0.25s, border-color 0.25s, color 0.2s; }
-  body.light .hour-cell.work { background: rgba(90,138,0,0.1); }
-  body.light .hour-cell.sleep { background: rgba(192,0,42,0.06); }
   body.light .sel-overlay { background: rgba(90,138,0,0.15); border-color: #5a8a00; }
   body.light .drag-handle::after { background: #5a8a00; box-shadow: 0 0 6px rgba(90,138,0,0.5); }
   body.light .hour-cell.half .hour-num { color: #a0a090; }
@@ -93,9 +91,30 @@
   .sel-info strong { color: var(--accent); }
   .legend { display: flex; gap: 1rem; align-items: center; }
   .leg { display: flex; align-items: center; gap: 0.35rem; font-size: 0.6rem; color: var(--muted); }
+  /* Presets */
+  .presets-wrap { position: relative; }
+  .presets-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 0.22rem 0.65rem; border-radius: 4px; cursor: pointer; font-family: "DM Mono", monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.15s; white-space: nowrap; display: flex; align-items: center; gap: 0.35rem; }
+  .presets-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .presets-panel { position: absolute; top: calc(100% + 6px); left: 0; width: 260px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; z-index: 300; display: none; padding: 0.6rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .presets-panel.open { display: block; }
+  .presets-panel-title { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; padding: 0 0.2rem; }
+  .preset-row { display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.2rem; border-radius: 4px; transition: background 0.1s; }
+  .preset-row:hover { background: var(--surface2); }
+  .preset-slot-btn { flex: 1; background: none; border: 1px solid var(--border); color: var(--text); font-family: "DM Mono", monospace; font-size: 0.65rem; padding: 0.3rem 0.5rem; border-radius: 4px; cursor: pointer; text-align: left; transition: all 0.15s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .preset-slot-btn.empty { color: var(--muted); border-style: dashed; }
+  .preset-slot-btn:hover:not(.empty) { border-color: var(--accent); color: var(--accent); }
+  .preset-slot-btn.empty:hover { border-color: var(--muted); color: var(--text); }
+  .preset-save-btn { background: var(--accent); color: var(--bg); border: none; border-radius: 4px; padding: 0.28rem 0.5rem; font-size: 0.58rem; font-family: "DM Mono", monospace; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; transition: opacity 0.15s; white-space: nowrap; }
+  .preset-save-btn:hover { opacity: 0.8; }
+  .preset-del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.75rem; padding: 0.1rem 0.2rem; transition: color 0.15s; flex-shrink: 0; }
+  .preset-del-btn:hover { color: var(--accent2); }
+  .preset-edit-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.7rem; padding: 0.1rem 0.2rem; transition: color 0.15s; flex-shrink: 0; }
+  .preset-edit-btn:hover { color: var(--accent); }
+  .preset-name-input { flex: 1; background: var(--bg); border: 1px solid var(--accent); color: var(--text); font-family: "DM Mono", monospace; font-size: 0.65rem; padding: 0.28rem 0.5rem; border-radius: 4px; outline: none; min-width: 0; }
+  .preset-confirm-btn { background: var(--accent); color: var(--bg); border: none; border-radius: 4px; padding: 0.28rem 0.5rem; font-size: 0.58rem; font-family: "DM Mono", monospace; cursor: pointer; white-space: nowrap; }
+  .preset-confirm-btn:hover { opacity: 0.8; }
+  .presets-divider { height: 1px; background: var(--border); margin: 0.4rem 0; }
   .leg-dot { width: 8px; height: 8px; border-radius: 2px; }
-  .leg-dot.work { background: rgba(200,240,78,0.35); }
-  .leg-dot.sleep { background: rgba(240,78,122,0.35); }
   .leg-dot.sel { background: rgba(200,240,78,0.2); border: 1px solid var(--accent); }
 
   .clocks-area { flex: 1; overflow-y: auto; }
@@ -127,8 +146,6 @@
   .timeline-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
   .timeline { display: flex; position: relative; user-select: none; }
   .hour-cell { width: var(--cell-w); min-width: var(--cell-w); height: 72px; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: crosshair; position: relative; background: var(--bg); flex-shrink: 0; }
-  .hour-cell.work { background: rgba(200,240,78,0.07); }
-  .hour-cell.sleep { background: rgba(240,78,122,0.06); }
   .hour-num { font-size: 0.72rem; color: var(--text); line-height: 1; }
   .hour-cell.half .hour-num { font-size: 0.6rem; color: var(--muted); }
   .ampm-tiny { font-size: 0.5rem; color: var(--muted); margin-top: 0.1rem; }
@@ -140,6 +157,45 @@
 
   .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; color: var(--muted); }
   .empty-state .big { font-family: 'Open Sans', sans-serif; font-weight: 300; font-size: 2.5rem; color: var(--border); margin-bottom: 0.5rem; }
+  .now-marker {
+    position: absolute; top: 0; bottom: 0;
+    width: 2px; background: var(--accent);
+    z-index: 15; pointer-events: none;
+    transform: translateX(-50%);
+  }
+  .now-marker::before {
+    content: 'NOW';
+    position: absolute; top: 4px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent); color: var(--bg);
+    font-size: 0.45rem; font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 0.1rem 0.25rem; border-radius: 2px;
+    white-space: nowrap;
+  }
+  .now-marker::after {
+    content: '';
+    position: absolute; top: 26px; left: 50%;
+    transform: translateX(-50%);
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 rgba(200,240,78,0.6);
+    animation: nowPulse 1.8s ease-out infinite;
+  }
+  body.light .now-marker::after {
+    box-shadow: 0 0 0 0 rgba(90,138,0,0.5);
+    animation: nowPulseLight 1.8s ease-out infinite;
+  }
+  @keyframes nowPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(200,240,78,0.7); }
+    70%  { box-shadow: 0 0 0 7px rgba(200,240,78,0); }
+    100% { box-shadow: 0 0 0 0 rgba(200,240,78,0); }
+  }
+  @keyframes nowPulseLight {
+    0%   { box-shadow: 0 0 0 0 rgba(90,138,0,0.6); }
+    70%  { box-shadow: 0 0 0 7px rgba(90,138,0,0); }
+    100% { box-shadow: 0 0 0 0 rgba(90,138,0,0); }
+  }
 </style>
 </head>
 <body>
@@ -176,9 +232,16 @@
       <button class="nav-btn" id="navRR" title="Fwd 2h">2h <span class="arrow">&#187;</span></button>
     </div>
     <div class="legend">
-      <div class="leg"><div class="leg-dot work"></div>Business</div>
-      <div class="leg"><div class="leg-dot sleep"></div>Night</div>
       <div class="leg"><div class="leg-dot sel"></div>Selected</div>
+    </div>
+    <div class="presets-wrap" id="presetsWrap">
+      <button class="presets-btn" id="presetsBtn">&#9776; Presets</button>
+      <div class="presets-panel" id="presetsPanel">
+        <div class="presets-panel-title">Saved Presets</div>
+        <div id="presetsList"></div>
+        <div class="presets-divider"></div>
+        <div style="font-size:0.6rem;color:var(--muted);padding:0 0.2rem">Click a preset to load &middot; Save overwrites it</div>
+      </div>
     </div>
     <div class="sel-info" id="selInfo"></div>
   </div>
@@ -192,7 +255,7 @@
 // CONSTANTS & STATE
 // ============================================================
 const CELL_W  = 36;
-const SLOTS   = 48;
+const SLOTS   = 72; // 36 hours: starts 12h before midnight of anchorDay
 const SLOT_MINS = 30;
 
 let cities  = [];
@@ -454,8 +517,10 @@ function buildSlotUTCMs() {
     else lo = mid;
   }
   const midnightUTC = lo;
+  // Start 24 slots (12h) before midnight so NOW can always be centered
+  const startOffset = -24 * SLOT_MINS * 60000; // 12 hours before midnight
   for (let i = 0; i < SLOTS; i++) {
-    slotUTCMs.push(midnightUTC + i * SLOT_MINS * 60000);
+    slotUTCMs.push(midnightUTC + startOffset + i * SLOT_MINS * 60000);
   }
 }
 
@@ -479,6 +544,28 @@ function getOffsetLabel(cityTz) {
 // ============================================================
 // RENDER
 // ============================================================
+function positionNowMarker(el, tz) {
+  if (!slotUTCMs.length) { el.style.display = 'none'; return; }
+  const nowMs = Date.now();
+  // Find which slot the current time falls in
+  let slotIdx = -1;
+  for (let i = 0; i < SLOTS - 1; i++) {
+    if (nowMs >= slotUTCMs[i] && nowMs < slotUTCMs[i + 1]) { slotIdx = i; break; }
+  }
+  if (slotIdx === -1) { el.style.display = 'none'; return; }
+  // Precise sub-slot position
+  const fraction = (nowMs - slotUTCMs[slotIdx]) / (slotUTCMs[slotIdx + 1] - slotUTCMs[slotIdx]);
+  el.style.display = '';
+  el.style.left = ((slotIdx + fraction) * CELL_W) + 'px';
+}
+
+function updateNowMarkers() {
+  cities.forEach((city, idx) => {
+    const el = document.getElementById('now-marker-' + idx);
+    if (el) positionNowMarker(el, city.tz);
+  });
+}
+
 function render() {
   buildSlotUTCMs();
   const area = document.getElementById('clocksArea');
@@ -492,12 +579,25 @@ function render() {
   cities.forEach((city, idx) => buildRow(city, idx));
   updateSelInfo();
 
-  const nowLocal = getHourMinInTZ(Date.now(), (cities[homeIdx] || cities[0]).tz);
-  const nowSlot  = nowLocal.hour * 2 + (nowLocal.minute >= 30 ? 1 : 0);
-  const firstWrapEl = document.getElementById('tlwrap_0');
-  const visibleSlots = firstWrapEl ? Math.floor(firstWrapEl.clientWidth / CELL_W) : 10;
-  const scrollTo = Math.max(0, (nowSlot - Math.floor(visibleSlots / 2))) * CELL_W;
-  document.querySelectorAll('.timeline-wrap').forEach(w => { w.scrollLeft = scrollTo; });
+  // Use setTimeout to ensure full layout before reading clientWidth
+  setTimeout(() => {
+    const nowLocal = getHourMinInTZ(Date.now(), (cities[homeIdx] || cities[0]).tz);
+    const nowMs    = Date.now();
+    // Get precise sub-slot position of now
+    let nowPx = 0;
+    for (let i = 0; i < SLOTS - 1; i++) {
+      if (nowMs >= slotUTCMs[i] && nowMs < slotUTCMs[i+1]) {
+        const frac = (nowMs - slotUTCMs[i]) / (slotUTCMs[i+1] - slotUTCMs[i]);
+        nowPx = (i + frac) * CELL_W;
+        break;
+      }
+    }
+    const firstWrapEl = document.getElementById('tlwrap_0');
+    if (!firstWrapEl) return;
+    const visibleW = firstWrapEl.clientWidth;
+    const scrollTo = Math.max(0, nowPx - visibleW / 2);
+    document.querySelectorAll('.timeline-wrap').forEach(w => { w.scrollLeft = scrollTo; });
+  }, 50);
 
   document.querySelectorAll('.timeline').forEach(tl => setupDrag(tl));
 
@@ -605,6 +705,13 @@ function buildRow(city, idx) {
   overlay.appendChild(rh);
   tl.appendChild(overlay);
 
+  // NOW marker — only meaningful for home city row but added to all (positioned identically)
+  const nowMarker = document.createElement('div');
+  nowMarker.className = 'now-marker';
+  nowMarker.id = 'now-marker-' + idx;
+  tl.appendChild(nowMarker);
+  positionNowMarker(nowMarker, city.tz);
+
   for (let i = 0; i < SLOTS; i++) {
     const utcMs = slotUTCMs[i];
     const {hour, minute} = getHourMinInTZ(utcMs, city.tz);
@@ -612,8 +719,6 @@ function buildRow(city, idx) {
     const cell = document.createElement('div');
     cell.className = 'hour-cell' + (isHalf ? ' half' : '');
     cell.dataset.slot = i;
-    if ((hour >= 9 && hour < 18) || (hour === 18 && minute === 0)) cell.classList.add('work');
-    else if (hour < 7 || hour >= 22) cell.classList.add('sleep');
     const h12 = hour % 12 || 12;
     const ampm = hour < 12 ? 'am' : 'pm';
     if (isHalf) {
@@ -645,8 +750,10 @@ function startClockTick() {
   if (clockInterval) clearInterval(clockInterval);
   clockInterval = setInterval(() => {
     cities.forEach((city, idx) => updateClockEl(idx));
-  }, 1000);
+    updateNowMarkers();
+  }, 10000); // update every 10s — enough precision for a 30-min slot
   cities.forEach((city, idx) => updateClockEl(idx));
+  updateNowMarkers();
 }
 function updateClockEl(idx) {
   const city = cities[idx];
@@ -684,6 +791,7 @@ function updateAllOverlays() {
     if (o) positionOverlay(o);
   });
   updateSelInfo();
+
   cities.forEach((_, idx) => updateClockEl(idx));
 }
 
@@ -862,11 +970,18 @@ document.getElementById('navL').addEventListener('click',  () => scrollAllBy(-2)
 document.getElementById('navRR').addEventListener('click', () => scrollAllBy(4));
 document.getElementById('navR').addEventListener('click',  () => scrollAllBy(2));
 document.getElementById('navNow').addEventListener('click', () => {
-  const nowLocal = getHourMinInTZ(Date.now(), (cities[homeIdx] || cities[0]).tz);
-  const nowSlot  = nowLocal.hour * 2 + (nowLocal.minute >= 30 ? 1 : 0);
+  const nowMs = Date.now();
+  let nowPx = 0;
+  for (let i = 0; i < SLOTS - 1; i++) {
+    if (nowMs >= slotUTCMs[i] && nowMs < slotUTCMs[i+1]) {
+      const frac = (nowMs - slotUTCMs[i]) / (slotUTCMs[i+1] - slotUTCMs[i]);
+      nowPx = (i + frac) * CELL_W;
+      break;
+    }
+  }
   const wrap0 = document.getElementById('tlwrap_0');
-  const visibleSlots = wrap0 ? Math.floor(wrap0.clientWidth / CELL_W) : 10;
-  const scrollTo = Math.max(0, (nowSlot - Math.floor(visibleSlots / 2))) * CELL_W;
+  const visibleW = wrap0 ? wrap0.clientWidth : 600;
+  const scrollTo = Math.max(0, nowPx - visibleW / 2);
   document.querySelectorAll('.timeline-wrap').forEach(w => { w.scrollLeft = scrollTo; });
 });
 
@@ -891,8 +1006,7 @@ function savePrefs() {
   try {
     localStorage.setItem('worldtime_cities', JSON.stringify(cities.map(c => ({name: c.name, tz: c.tz}))));
     localStorage.setItem('worldtime_home', String(homeIdx));
-    const toast = document.getElementById('toast');
-    if (toast) { toast.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => toast.classList.remove('show'), 1800); }
+    showToast('Preferences saved');
   } catch(e) {}
 }
 function loadPrefs() {
@@ -1005,6 +1119,192 @@ function detectLocation() {
     })
     .catch(() => {});
 }
+
+// ============================================================
+// PRESETS
+// ============================================================
+const MAX_PRESETS = 5;
+const PRESET_KEY  = 'worldtime_presets';
+
+function loadPresets() {
+  try {
+    const raw = localStorage.getItem(PRESET_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function savePresetsToStorage(presets) {
+  try { localStorage.setItem(PRESET_KEY, JSON.stringify(presets)); } catch(e) {}
+}
+
+function renderPresetsList() {
+  const list = document.getElementById('presetsList');
+  if (!list) return;
+  const presets = loadPresets();
+  list.innerHTML = '';
+
+  for (let i = 0; i < MAX_PRESETS; i++) {
+    const preset = presets[i] || null;
+    const row = document.createElement('div');
+    row.className = 'preset-row';
+
+    // Load/name button
+    const loadBtn = document.createElement('button');
+    loadBtn.className = 'preset-slot-btn' + (preset ? '' : ' empty');
+    if (preset) {
+      loadBtn.title = 'Load: ' + preset.cities.map(c => c.name).join(', ');
+      loadBtn.innerHTML = '<strong style="color:var(--accent)">' + (i+1) + '.</strong> ' + preset.name;
+    } else {
+      loadBtn.textContent = (i+1) + '. Empty slot';
+    }
+    loadBtn.addEventListener('click', () => {
+      if (!preset) {
+        saveCurrentAsPreset(i);
+      } else {
+        const loaded = preset.cities
+          .map(s => CITIES.find(c => c.name === s.name && c.tz === s.tz))
+          .filter(Boolean);
+        if (loaded.length === 0) return;
+        cities = loaded;
+        homeIdx = preset.homeIdx >= 0 && preset.homeIdx < loaded.length ? preset.homeIdx : 0;
+        savePrefs(); render();
+        document.getElementById('presetsPanel').classList.remove('open');
+        showToast('"' + preset.name + '" loaded');
+      }
+    });
+
+    // Save/overwrite btn
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'preset-save-btn';
+    saveBtn.textContent = preset ? 'Update' : 'Save';
+    saveBtn.title = preset ? 'Overwrite with current cities' : 'Save current cities here';
+    saveBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      saveCurrentAsPreset(i);
+    });
+
+    row.appendChild(loadBtn);
+    row.appendChild(saveBtn);
+
+    if (preset) {
+      // Edit name btn
+      const editBtn = document.createElement('button');
+      editBtn.className = 'preset-edit-btn';
+      editBtn.textContent = '✎';
+      editBtn.title = 'Rename preset';
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showRenameRow(i, preset.name, row, list);
+      });
+      row.appendChild(editBtn);
+
+      // Delete btn
+      const delBtn = document.createElement('button');
+      delBtn.className = 'preset-del-btn';
+      delBtn.textContent = '✕';
+      delBtn.title = 'Delete preset';
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const presets = loadPresets();
+        presets.splice(i, 1);
+        savePresetsToStorage(presets);
+        renderPresetsList();
+        showToast('Preset deleted');
+      });
+      row.appendChild(delBtn);
+    }
+
+    list.appendChild(row);
+  }
+}
+
+function showRenameRow(slotIdx, currentName, originalRow, list) {
+  // Replace the row temporarily with an inline rename form
+  const renameRow = document.createElement('div');
+  renameRow.className = 'preset-row';
+
+  const input = document.createElement('input');
+  input.className = 'preset-name-input';
+  input.value = currentName;
+  input.maxLength = 30;
+  input.placeholder = 'Enter preset name...';
+
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = 'preset-confirm-btn';
+  confirmBtn.textContent = 'Save';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'preset-del-btn';
+  cancelBtn.textContent = '✕';
+  cancelBtn.title = 'Cancel';
+
+  function doRename() {
+    const newName = input.value.trim();
+    if (!newName) { input.focus(); return; }
+    const presets = loadPresets();
+    if (presets[slotIdx]) {
+      presets[slotIdx].name = newName;
+      savePresetsToStorage(presets);
+    }
+    renderPresetsList();
+    showToast('Preset renamed');
+  }
+
+  confirmBtn.addEventListener('click', (e) => { e.stopPropagation(); doRename(); });
+  cancelBtn.addEventListener('click',  (e) => { e.stopPropagation(); renderPresetsList(); });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); doRename(); }
+    if (e.key === 'Escape') { e.preventDefault(); renderPresetsList(); }
+  });
+
+  renameRow.appendChild(input);
+  renameRow.appendChild(confirmBtn);
+  renameRow.appendChild(cancelBtn);
+  list.replaceChild(renameRow, originalRow);
+  setTimeout(() => { input.focus(); input.select(); }, 10);
+}
+
+function saveCurrentAsPreset(slotIdx) {
+  if (cities.length === 0) { showToast('No cities to save'); return; }
+  const presets = loadPresets();
+  while (presets.length <= slotIdx) presets.push(null);
+
+  // Keep existing name if overwriting, otherwise auto-generate
+  const existingName = presets[slotIdx] && presets[slotIdx].name;
+  const autoName = cities.slice(0,3).map(c => c.name).join(', ') + (cities.length > 3 ? '...' : '');
+  presets[slotIdx] = {
+    name: existingName || autoName,
+    cities: cities.map(c => ({name: c.name, tz: c.tz})),
+    homeIdx: homeIdx,
+    savedAt: Date.now()
+  };
+  savePresetsToStorage(presets);
+  renderPresetsList();
+  showToast('Saved to preset ' + (slotIdx+1));
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.classList.remove('show'); toast.textContent = 'Preferences saved'; }, 1800);
+}
+
+// Toggle panel
+document.getElementById('presetsBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const panel = document.getElementById('presetsPanel');
+  const isOpen = panel.classList.contains('open');
+  if (!isOpen) renderPresetsList();
+  panel.classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#presetsWrap')) {
+    document.getElementById('presetsPanel').classList.remove('open');
+  }
+});
 
 // ============================================================
 // INIT
