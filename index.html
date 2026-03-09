@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VP6M8CMPYV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-VP6M8CMPYV');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>World Time · Free Timezone Converter by City</title>
@@ -1043,7 +1052,7 @@ function loadPrefs() {
     const saved = JSON.parse(raw);
     if (!Array.isArray(saved)) return false;
     if (saved.length === 0) { cities = []; homeIdx = -1; return true; }
-    cities = saved.map(s => CITIES.find(c => c.name === s.name && c.tz === s.tz)).filter(Boolean);
+    cities = saved.map(s => resolveCity(s)).filter(Boolean);
     const sh = localStorage.getItem('worldtime_home');
     homeIdx = sh !== null ? parseInt(sh) : 0;
     if (homeIdx >= cities.length) homeIdx = cities.length > 0 ? 0 : -1;
@@ -1147,6 +1156,23 @@ function detectLocation() {
     .catch(() => {});
 }
 
+// Helper: reconstruct a city object from saved {name, tz}
+// Looks in CITIES first, then TZ_ZONES, then rebuilds from raw saved data
+function resolveCity(s) {
+  // 1. Exact match in CITIES
+  const fromCities = CITIES.find(c => c.name === s.name && c.tz === s.tz);
+  if (fromCities) return fromCities;
+  // 2. Match in TZ_ZONES (timezone entries like IST, CET, etc.)
+  const fromZones = TZ_ZONES.find(z => z.tz === s.tz && z.abbr === s.name);
+  if (fromZones) return {name: fromZones.abbr, country: fromZones.label, tz: fromZones.tz, abbr: fromZones.abbr};
+  // 3. Fallback: rebuild from raw saved data (preserves anything custom)
+  if (s.name && s.tz) {
+    const abbr = s.abbr || s.name;
+    return {name: s.name, country: s.country || s.name, tz: s.tz, abbr: abbr};
+  }
+  return null;
+}
+
 // ============================================================
 // PRESETS
 // ============================================================
@@ -1189,7 +1215,7 @@ function renderPresetsList() {
         saveCurrentAsPreset(i);
       } else {
         const loaded = preset.cities
-          .map(s => CITIES.find(c => c.name === s.name && c.tz === s.tz))
+          .map(s => resolveCity(s))
           .filter(Boolean);
         if (loaded.length === 0) return;
         cities = loaded;
